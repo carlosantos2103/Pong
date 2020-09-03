@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="Pong-1.0-SNAPSHOT">
+    <output-path>D:\00\Programacao\KotlinJs\Pong\build\libs</output-path>
+    <root id="archive" name="Pong-1.0-SNAPSHOT.jar">
+      <element id="module-output" name="Pong.main" />
+    </root>
+  </artifact>
+</component>
