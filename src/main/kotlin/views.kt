@@ -15,6 +15,7 @@ fun initializeCanvasContext(width: Int, height: Int): CanvasRenderingContext2D{
     val canvas = document.createElement("canvas") as HTMLCanvasElement
     canvas.width = width
     canvas.height = height
+    canvas.setAttribute("class", "arena")
     document.body?.appendChild(canvas)
     return canvas.getContext("2d") as CanvasRenderingContext2D
 }
@@ -24,7 +25,7 @@ fun initializeCanvasContext(width: Int, height: Int): CanvasRenderingContext2D{
  * @param context   The drawing context.
  */
 fun drawBackground(context: CanvasRenderingContext2D){
-    var margin=15.0
+    val margin=15.0
     context.fillStyle = "#333300"
     context.fillRect(
             0.0, 0.0, context.canvas.width.toDouble(), context.canvas.height.toDouble()

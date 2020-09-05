@@ -16,9 +16,8 @@ fun main() {
         }
 
         val context = initializeCanvasContext(arenaWidth, arenaHeight)
-        window.onclick = {
-            if (it.clientY < context.canvas.height && it.clientX < context.canvas.width)
-                arena = start(arena)
+        context.canvas.onclick = {
+            arena = start(arena)
             true
         }
 
