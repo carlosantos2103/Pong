@@ -1,3 +1,4 @@
+import org.w3c.dom.Audio
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
@@ -37,7 +38,7 @@ fun initializeArena(width: Int, height: Int): Arena {
     )
 
     val bat = Bat(Location(width - 15.0, height / 2.0), 7.0, 80.0)
-    val batBot = Bat(Location(15.0, ball.center.y), 6.5, 80.0)
+    val batBot = Bat(Location(15.0, ball.center.y), 7.0, 80.0)
 
     return Arena(bat, batBot, ball, width, height, 0, 0)
 }
@@ -45,9 +46,9 @@ fun initializeArena(width: Int, height: Int): Arena {
 /**
  * Generates the initial ball velocity.
  */
-fun getInitialVelocity(): Velocity {
+private fun getInitialVelocity(): Velocity {
     val alpha = Random.nextDouble(-PI / 5, PI / 5)
-    val magnitude = 10.0
+    val magnitude = 9.0
     return Velocity(magnitude * cos(alpha), magnitude * sin(alpha))
 }
 
@@ -67,24 +68,27 @@ fun doStep(arena: Arena, batLocation: Location) : Arena {
             arena.height.toDouble(),
             6.0
     )
-
-    val ball = moveBall(arena.ball, arena.width.toDouble(), arena.height.toDouble())
     val startBall = Ball(
             Location(arena.width / 2.0, arena.height / 2.0),
-            ball.radius,
+            arena.ball.radius,
             Velocity(dx = 0.0, dy = 0.0)
     )
+
+    val ball = moveBall(arena.ball, arena.width.toDouble(), arena.height.toDouble())
+    val newBall = if (isBatHittingBall(ball, bat, batBot, arena.ball.center)) deflectBall(arena)
+        else ball
+
+    println(isBatHittingBall(ball, bat, batBot, arena.ball.center))
 
     return Arena(
             bat,
             batBot,
-            if (isBatHittingBall(ball, bat, batBot)) deflectBall(arena)
-                else if(!isBallInHorizontalBounds(ball, arena.width.toDouble()))startBall
-                else ball,
+            if(!isBallInHorizontalBounds(newBall, arena.width.toDouble())) startBall
+                else newBall,
             arena.width,
             arena.height,
-            if(isLoss(ball, arena.width)) arena.score + 1 else arena.score,
-            if(isBotLoss(ball, arena.width)) arena.scoreBot + 1 else arena.scoreBot
+            if(isLoss(newBall, arena.width)) arena.score + 1 else arena.score,
+            if(isBotLoss(newBall, arena.width)) arena.scoreBot + 1 else arena.scoreBot
     )
 }
 

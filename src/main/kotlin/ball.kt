@@ -1,6 +1,9 @@
 import kotlin.math.max
 import kotlin.math.min
 
+const val X_MARGIN = 5.0
+const val Y_MARGIN = 7.0
+
 /**
  * Defines the representation of the ball.
  * @property center     The ball's location (its center).
@@ -12,6 +15,9 @@ data class Ball(
     val radius: Double,
     val velocity: Velocity
 )
+
+//TODO: Fix this!
+private val audioHandles: AudioHandles = initializeAudio()
 
 /**
  * Checks whether the ball is moving.
@@ -28,7 +34,7 @@ fun isBallMoving(ball: Ball) =
  * @return true if the ball is Horizontal Bounds, false otherwise
  */
 fun isBallInHorizontalBounds(ball: Ball, width: Double) =
-    ball.center.x - ball.radius > 0.0 && ball.center.x + ball.radius < width
+    ball.center.x - ball.radius > X_MARGIN && ball.center.x + ball.radius < width - X_MARGIN
 
 /**
  * Checks whether the ball is in Vertical Bounds.
@@ -36,8 +42,8 @@ fun isBallInHorizontalBounds(ball: Ball, width: Double) =
  * @param height  The Vertical limits.
  * @return true if the ball is Vertical Bounds, false otherwise
  */
-fun isBallInVerticalBounds(ball: Ball, height: Double) =
-    ball.center.y - ball.radius >= 7.0 && ball.center.y + ball.radius <= height - 7.0
+private fun isBallInVerticalBounds(ball: Ball, height: Double) =
+    ball.center.y - ball.radius >= Y_MARGIN && ball.center.y + ball.radius <= height - Y_MARGIN
 
 /**
  * Moves the ball within the specified bounds and with its velocity.
@@ -52,17 +58,19 @@ fun moveBall(ball: Ball, width: Double, height: Double): Ball{
             ball.velocity
     )
 
-    return if (!isBallInVerticalBounds(newBall, height)) Ball(
+    if (isBallInVerticalBounds(newBall, height)) return newBall
+
+    audioHandles.hit.play()
+    return Ball(
             Location(
-                if (newBall.velocity.dx < 0) max(0.0 + newBall.radius, newBall.center.x)
-                    else min(width - newBall.radius, newBall.center.x),
-                if (newBall.velocity.dy < 0) max(7.0 + newBall.radius, newBall.center.y)
-                    else min(height - 7.0 - newBall.radius, newBall.center.y)
+                    if (newBall.velocity.dx < 0) max(X_MARGIN + newBall.radius, newBall.center.x)
+                    else min(width - X_MARGIN - newBall.radius, newBall.center.x),
+                    if (newBall.velocity.dy < 0) max(Y_MARGIN + newBall.radius, newBall.center.y)
+                    else min(height - Y_MARGIN - newBall.radius, newBall.center.y)
             ),
             newBall.radius,
             Velocity(newBall.velocity.dx, -newBall.velocity.dy)
     )
-    else newBall
 }
 
 
@@ -71,11 +79,21 @@ fun moveBall(ball: Ball, width: Double, height: Double): Ball{
  * @property ball       The ball.
  * @param width     The width of the arena.
  */
-fun isLoss(ball: Ball, width: Int) = ball.center.x + ball.radius >= width
+fun isLoss(ball: Ball, width: Int): Boolean{
+    if (ball.center.x + ball.radius >= width - X_MARGIN)
+        audioHandles.isLoss.play()
+
+    return ball.center.x + ball.radius >= width - X_MARGIN
+}
 
 /**
  * Checks if the ball has entered the bot's safezone, that is, if a loss should be accounted for
  * @property ball       The ball.
  * @param width     The width of the arena.
  */
-fun isBotLoss(ball: Ball, width: Int) = ball.center.x + ball.radius <= 0.0
+fun isBotLoss(ball: Ball, width: Int): Boolean{
+    if(ball.center.x + ball.radius <= X_MARGIN)
+        audioHandles.isLoss.play()
+
+    return ball.center.x + ball.radius <= X_MARGIN
+}

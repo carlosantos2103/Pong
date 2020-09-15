@@ -1,9 +1,19 @@
 import kotlin.browser.window
 
-const val arenaWidth = 800
-const val arenaHeight= 500
+private const val arenaWidth = 800
+private const val arenaHeight= 500
+
+/**
+ * The application entry point.
+ */
 
 fun main() {
+
+    val ball: Ball? = Ball(
+            Location(10.0,10.0),
+            15.0,
+            Velocity(10.0, 0.0)
+    )
 
     window.onload = {
 
