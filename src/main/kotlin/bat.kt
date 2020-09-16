@@ -8,9 +8,6 @@ import kotlin.random.Random
  */
 data class Bat(val location: Location, val width: Double, val height: Double)
 
-//TODO: Fix this!
-private val audioHandles: AudioHandles = initializeAudio()
-
 /**
  * Gets the horizontal coordinate of the bat's left edge.
  * @param bat   The bat instance
@@ -107,8 +104,6 @@ fun deflectBall(arena: Arena) : Ball{
     else
         arena.ball.center.y - arena.batBot.location.y
 
-    audioHandles.batHit.play()
-
     return Ball(
             Location(
                     arena.ball.center.x,
@@ -118,6 +113,7 @@ fun deflectBall(arena: Arena) : Ball{
             Velocity(
                     dx = -arena.ball.velocity.dx - Random.nextDouble(0.0, 1.3),
                     dy = arena.ball.velocity.dy + (cont * Random.nextDouble(0.08, 0.18))
-            )
+            ),
+            Deflection.BY_BAT
     )
 }

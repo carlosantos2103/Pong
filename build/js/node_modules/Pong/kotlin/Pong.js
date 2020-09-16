@@ -15,9 +15,15 @@
   var math = Kotlin.kotlin.math;
   var println = Kotlin.kotlin.io.println_s8jyv4$;
   var Math_0 = Math;
+  var Enum = Kotlin.kotlin.Enum;
+  var throwISE = Kotlin.throwISE;
   var rangeTo = Kotlin.kotlin.ranges.rangeTo_38ydlf$;
   var Unit = Kotlin.kotlin.Unit;
+  var equals = Kotlin.equals;
+  var Kind_OBJECT = Kotlin.Kind.OBJECT;
   var throwCCE = Kotlin.throwCCE;
+  Deflection.prototype = Object.create(Enum.prototype);
+  Deflection.prototype.constructor = Deflection;
   function Arena(bat, batBot, ball, width, height, score, scoreBot) {
     this.bat = bat;
     this.batBot = batBot;
@@ -87,7 +93,7 @@
   function doStep(arena, batLocation) {
     var bat = keepBatArenaInBounds(new Bat(batLocation, 6.5, 80.0), arena.height, 6.0);
     var batBot = keepBatArenaInBounds(new Bat(new Location(15.0, arena.ball.center.y), 6.5, 80.0), arena.height, 6.0);
-    var startBall = new Ball(new Location(arena.width / 2.0, arena.height / 2.0), arena.ball.radius, new Velocity(0.0, 0.0));
+    var startBall = new Ball(new Location(arena.width / 2.0, arena.height / 2.0), arena.ball.radius, new Velocity(0.0, 0.0), Deflection$RESTART_getInstance());
     var ball = moveBall(arena.ball, arena.width, arena.height);
     var newBall = isBatHittingBall(ball, bat, batBot, arena.ball.center) ? deflectBall(arena) : ball;
     println(isBatHittingBall(ball, bat, batBot, arena.ball.center));
@@ -98,10 +104,13 @@
   }
   var X_MARGIN;
   var Y_MARGIN;
-  function Ball(center, radius, velocity) {
+  function Ball(center, radius, velocity, deflection) {
+    if (deflection === void 0)
+      deflection = null;
     this.center = center;
     this.radius = radius;
     this.velocity = velocity;
+    this.deflection = deflection;
   }
   Ball.$metadata$ = {
     kind: Kind_CLASS,
@@ -117,23 +126,74 @@
   Ball.prototype.component3 = function () {
     return this.velocity;
   };
-  Ball.prototype.copy_1ma3mm$ = function (center, radius, velocity) {
-    return new Ball(center === void 0 ? this.center : center, radius === void 0 ? this.radius : radius, velocity === void 0 ? this.velocity : velocity);
+  Ball.prototype.component4 = function () {
+    return this.deflection;
+  };
+  Ball.prototype.copy_4tvqv8$ = function (center, radius, velocity, deflection) {
+    return new Ball(center === void 0 ? this.center : center, radius === void 0 ? this.radius : radius, velocity === void 0 ? this.velocity : velocity, deflection === void 0 ? this.deflection : deflection);
   };
   Ball.prototype.toString = function () {
-    return 'Ball(center=' + Kotlin.toString(this.center) + (', radius=' + Kotlin.toString(this.radius)) + (', velocity=' + Kotlin.toString(this.velocity)) + ')';
+    return 'Ball(center=' + Kotlin.toString(this.center) + (', radius=' + Kotlin.toString(this.radius)) + (', velocity=' + Kotlin.toString(this.velocity)) + (', deflection=' + Kotlin.toString(this.deflection)) + ')';
   };
   Ball.prototype.hashCode = function () {
     var result = 0;
     result = result * 31 + Kotlin.hashCode(this.center) | 0;
     result = result * 31 + Kotlin.hashCode(this.radius) | 0;
     result = result * 31 + Kotlin.hashCode(this.velocity) | 0;
+    result = result * 31 + Kotlin.hashCode(this.deflection) | 0;
     return result;
   };
   Ball.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.center, other.center) && Kotlin.equals(this.radius, other.radius) && Kotlin.equals(this.velocity, other.velocity)))));
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.center, other.center) && Kotlin.equals(this.radius, other.radius) && Kotlin.equals(this.velocity, other.velocity) && Kotlin.equals(this.deflection, other.deflection)))));
   };
-  var audioHandles;
+  function Deflection(name, ordinal) {
+    Enum.call(this);
+    this.name$ = name;
+    this.ordinal$ = ordinal;
+  }
+  function Deflection_initFields() {
+    Deflection_initFields = function () {
+    };
+    Deflection$BY_BAT_instance = new Deflection('BY_BAT', 0);
+    Deflection$DEFAULT_instance = new Deflection('DEFAULT', 1);
+    Deflection$RESTART_instance = new Deflection('RESTART', 2);
+  }
+  var Deflection$BY_BAT_instance;
+  function Deflection$BY_BAT_getInstance() {
+    Deflection_initFields();
+    return Deflection$BY_BAT_instance;
+  }
+  var Deflection$DEFAULT_instance;
+  function Deflection$DEFAULT_getInstance() {
+    Deflection_initFields();
+    return Deflection$DEFAULT_instance;
+  }
+  var Deflection$RESTART_instance;
+  function Deflection$RESTART_getInstance() {
+    Deflection_initFields();
+    return Deflection$RESTART_instance;
+  }
+  Deflection.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Deflection',
+    interfaces: [Enum]
+  };
+  function Deflection$values() {
+    return [Deflection$BY_BAT_getInstance(), Deflection$DEFAULT_getInstance(), Deflection$RESTART_getInstance()];
+  }
+  Deflection.values = Deflection$values;
+  function Deflection$valueOf(name) {
+    switch (name) {
+      case 'BY_BAT':
+        return Deflection$BY_BAT_getInstance();
+      case 'DEFAULT':
+        return Deflection$DEFAULT_getInstance();
+      case 'RESTART':
+        return Deflection$RESTART_getInstance();
+      default:throwISE('No enum constant Deflection.' + name);
+    }
+  }
+  Deflection.valueOf_61zpoe$ = Deflection$valueOf;
   function isBallMoving(ball) {
     return ball.velocity.dx !== 0.0 || ball.velocity.dy !== 0.0;
   }
@@ -147,7 +207,6 @@
     var newBall = new Ball(add(ball.center, ball.velocity), ball.radius, ball.velocity);
     if (isBallInVerticalBounds(newBall, height))
       return newBall;
-    audioHandles.hit.play();
     var tmp$;
     if (newBall.velocity.dx < 0) {
       var a = X_MARGIN + newBall.radius;
@@ -168,16 +227,12 @@
       var b_2 = newBall.center.y;
       tmp$_0 = Math_0.min(a_2, b_2);
     }
-    return new Ball(new Location(tmp$, tmp$_0), newBall.radius, new Velocity(newBall.velocity.dx, -newBall.velocity.dy));
+    return new Ball(new Location(tmp$, tmp$_0), newBall.radius, new Velocity(newBall.velocity.dx, -newBall.velocity.dy), Deflection$DEFAULT_getInstance());
   }
   function isLoss(ball, width) {
-    if (ball.center.x + ball.radius >= width - X_MARGIN)
-      audioHandles.isLoss.play();
     return ball.center.x + ball.radius >= width - X_MARGIN;
   }
   function isBotLoss(ball, width) {
-    if (ball.center.x + ball.radius <= X_MARGIN)
-      audioHandles.isLoss.play();
     return ball.center.x + ball.radius <= X_MARGIN;
   }
   function Bat(location, width, height) {
@@ -215,7 +270,6 @@
   Bat.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.location, other.location) && Kotlin.equals(this.width, other.width) && Kotlin.equals(this.height, other.height)))));
   };
-  var audioHandles_0;
   function getBatLeftEdge(bat) {
     return bat.location.x - bat.width / 2;
   }
@@ -245,8 +299,7 @@
   }
   function deflectBall(arena) {
     var cont = arena.ball.center.x > arena.width / 2.0 ? arena.ball.center.y - arena.bat.location.y : arena.ball.center.y - arena.batBot.location.y;
-    audioHandles_0.batHit.play();
-    return new Ball(new Location(arena.ball.center.x, arena.ball.center.y), arena.ball.radius, new Velocity(-arena.ball.velocity.dx - Random.Default.nextDouble_lu1900$(0.0, 1.3), arena.ball.velocity.dy + cont * Random.Default.nextDouble_lu1900$(0.08, 0.18)));
+    return new Ball(new Location(arena.ball.center.x, arena.ball.center.y), arena.ball.radius, new Velocity(-arena.ball.velocity.dx - Random.Default.nextDouble_lu1900$(0.0, 1.3), arena.ball.velocity.dy + cont * Random.Default.nextDouble_lu1900$(0.08, 0.18)), Deflection$BY_BAT_getInstance());
   }
   function Location(x, y) {
     this.x = x;
@@ -358,6 +411,7 @@
   function main$lambda$lambda_1(closure$arena, closure$batLocation, closure$context) {
     return function () {
       closure$arena.v = doStep(closure$arena.v, closure$batLocation.v);
+      maybePlaySound(closure$arena.v);
       drawArena(closure$arena.v, closure$context);
       return Unit;
     };
@@ -371,46 +425,34 @@
     return window.setInterval(main$lambda$lambda_1(arena, batLocation, context), 16);
   }
   function main() {
-    var ball = new Ball(new Location(10.0, 10.0), 15.0, new Velocity(10.0, 0.0));
     window.onload = main$lambda;
   }
-  function AudioHandles(batHit, hit, isLoss) {
-    this.batHit = batHit;
-    this.hit = hit;
-    this.isLoss = isLoss;
+  function maybePlaySound(arena) {
+    var tmp$;
+    tmp$ = arena.ball.deflection;
+    if (equals(tmp$, Deflection$BY_BAT_getInstance()))
+      Sounds_getInstance().batHit.play();
+    else if (equals(tmp$, Deflection$DEFAULT_getInstance()))
+      Sounds_getInstance().defaultHit.play();
+    else if (equals(tmp$, Deflection$RESTART_getInstance()))
+      Sounds_getInstance().pointHit.play();
   }
-  AudioHandles.$metadata$ = {
-    kind: Kind_CLASS,
-    simpleName: 'AudioHandles',
+  function Sounds() {
+    Sounds_instance = this;
+    this.batHit = new Audio('bat_hit_1.wav');
+    this.defaultHit = new Audio('hit.wav');
+    this.pointHit = new Audio('is_loss.wav');
+  }
+  Sounds.$metadata$ = {
+    kind: Kind_OBJECT,
+    simpleName: 'Sounds',
     interfaces: []
   };
-  AudioHandles.prototype.component1 = function () {
-    return this.batHit;
-  };
-  AudioHandles.prototype.component2 = function () {
-    return this.hit;
-  };
-  AudioHandles.prototype.component3 = function () {
-    return this.isLoss;
-  };
-  AudioHandles.prototype.copy_c9zpf6$ = function (batHit, hit, isLoss) {
-    return new AudioHandles(batHit === void 0 ? this.batHit : batHit, hit === void 0 ? this.hit : hit, isLoss === void 0 ? this.isLoss : isLoss);
-  };
-  AudioHandles.prototype.toString = function () {
-    return 'AudioHandles(batHit=' + Kotlin.toString(this.batHit) + (', hit=' + Kotlin.toString(this.hit)) + (', isLoss=' + Kotlin.toString(this.isLoss)) + ')';
-  };
-  AudioHandles.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.batHit) | 0;
-    result = result * 31 + Kotlin.hashCode(this.hit) | 0;
-    result = result * 31 + Kotlin.hashCode(this.isLoss) | 0;
-    return result;
-  };
-  AudioHandles.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.batHit, other.batHit) && Kotlin.equals(this.hit, other.hit) && Kotlin.equals(this.isLoss, other.isLoss)))));
-  };
-  function initializeAudio() {
-    return new AudioHandles(new Audio('bat_hit_1.wav'), new Audio('hit.wav'), new Audio('is_loss.wav'));
+  var Sounds_instance = null;
+  function Sounds_getInstance() {
+    if (Sounds_instance === null) {
+      new Sounds();
+    }return Sounds_instance;
   }
   function initializeCanvasContext(width, height) {
     var tmp$, tmp$_0, tmp$_1;
@@ -471,6 +513,16 @@
     }
   });
   _.Ball = Ball;
+  Object.defineProperty(Deflection, 'BY_BAT', {
+    get: Deflection$BY_BAT_getInstance
+  });
+  Object.defineProperty(Deflection, 'DEFAULT', {
+    get: Deflection$DEFAULT_getInstance
+  });
+  Object.defineProperty(Deflection, 'RESTART', {
+    get: Deflection$RESTART_getInstance
+  });
+  _.Deflection = Deflection;
   _.isBallMoving_187q7$ = isBallMoving;
   _.isBallInHorizontalBounds_8d7b1t$ = isBallInHorizontalBounds;
   _.moveBall_vktrcz$ = moveBall;
@@ -485,8 +537,7 @@
   _.add_bk32fg$ = add;
   _.Line = Line;
   _.main = main;
-  _.AudioHandles = AudioHandles;
-  _.initializeAudio = initializeAudio;
+  _.maybePlaySound_11tko7$ = maybePlaySound;
   _.initializeCanvasContext_vux9f0$ = initializeCanvasContext;
   _.drawBackground_f69bme$ = drawBackground;
   _.drawBat_84wou7$ = drawBat;
@@ -495,8 +546,6 @@
   _.drawArena_jwa8pb$ = drawArena;
   X_MARGIN = 5.0;
   Y_MARGIN = 7.0;
-  audioHandles = initializeAudio();
-  audioHandles_0 = initializeAudio();
   arenaWidth = 800;
   arenaHeight = 500;
   main();

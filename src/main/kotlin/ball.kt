@@ -1,7 +1,7 @@
 import kotlin.math.max
 import kotlin.math.min
 
-const val X_MARGIN = 5.0
+const val X_MARGIN = 7.0
 const val Y_MARGIN = 7.0
 
 /**
@@ -9,15 +9,19 @@ const val Y_MARGIN = 7.0
  * @property center     The ball's location (its center).
  * @property radius     The ball's radius.
  * @property velocity   The ball's velocity.
+ * @property deflection The ball's deflection, if one occured.
  */
 data class Ball(
     val center: Location,
     val radius: Double,
-    val velocity: Velocity
+    val velocity: Velocity,
+    val deflection: Deflection? = null
 )
 
-//TODO: Fix this!
-private val audioHandles: AudioHandles = initializeAudio()
+/**
+ * Defines the representation for identifying the existing ball deflections
+ */
+enum class Deflection { BY_BAT, DEFAULT, RESTART }
 
 /**
  * Checks whether the ball is moving.
@@ -60,7 +64,6 @@ fun moveBall(ball: Ball, width: Double, height: Double): Ball{
 
     if (isBallInVerticalBounds(newBall, height)) return newBall
 
-    audioHandles.hit.play()
     return Ball(
             Location(
                     if (newBall.velocity.dx < 0) max(X_MARGIN + newBall.radius, newBall.center.x)
@@ -69,7 +72,8 @@ fun moveBall(ball: Ball, width: Double, height: Double): Ball{
                     else min(height - Y_MARGIN - newBall.radius, newBall.center.y)
             ),
             newBall.radius,
-            Velocity(newBall.velocity.dx, -newBall.velocity.dy)
+            Velocity(newBall.velocity.dx, -newBall.velocity.dy),
+            Deflection.DEFAULT
     )
 }
 
@@ -79,21 +83,11 @@ fun moveBall(ball: Ball, width: Double, height: Double): Ball{
  * @property ball       The ball.
  * @param width     The width of the arena.
  */
-fun isLoss(ball: Ball, width: Int): Boolean{
-    if (ball.center.x + ball.radius >= width - X_MARGIN)
-        audioHandles.isLoss.play()
-
-    return ball.center.x + ball.radius >= width - X_MARGIN
-}
+fun isLoss(ball: Ball, width: Int) = ball.center.x + ball.radius >= width - X_MARGIN
 
 /**
  * Checks if the ball has entered the bot's safezone, that is, if a loss should be accounted for
  * @property ball       The ball.
  * @param width     The width of the arena.
  */
-fun isBotLoss(ball: Ball, width: Int): Boolean{
-    if(ball.center.x + ball.radius <= X_MARGIN)
-        audioHandles.isLoss.play()
-
-    return ball.center.x + ball.radius <= X_MARGIN
-}
+fun isBotLoss(ball: Ball, width: Int) = ball.center.x + ball.radius <= X_MARGIN

@@ -4,8 +4,7 @@ import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.random.Random
 
-/**
- * Defines the representation of the game's arena.
+/**Defines the representation of the game's arena.
  * @property bat        The player's bat.
  * @property bat        The bot's bat.
  * @property ball       The ball.
@@ -71,7 +70,8 @@ fun doStep(arena: Arena, batLocation: Location) : Arena {
     val startBall = Ball(
             Location(arena.width / 2.0, arena.height / 2.0),
             arena.ball.radius,
-            Velocity(dx = 0.0, dy = 0.0)
+            Velocity(dx = 0.0, dy = 0.0),
+            Deflection.RESTART
     )
 
     val ball = moveBall(arena.ball, arena.width.toDouble(), arena.height.toDouble())

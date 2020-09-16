@@ -9,14 +9,9 @@ private const val arenaHeight= 500
 
 fun main() {
 
-    val ball: Ball? = Ball(
-            Location(10.0,10.0),
-            15.0,
-            Velocity(10.0, 0.0)
-    )
-
     window.onload = {
 
+        val context = initializeCanvasContext(arenaWidth, arenaHeight)
         var arena = initializeArena(arenaWidth, arenaHeight)
         var batLocation = arena.bat.location
 
@@ -25,7 +20,6 @@ fun main() {
             true
         }
 
-        val context = initializeCanvasContext(arenaWidth, arenaHeight)
         context.canvas.onclick = {
             arena = start(arena)
             true
@@ -33,6 +27,7 @@ fun main() {
 
         window.setInterval({
             arena = doStep(arena, batLocation)
+            maybePlaySound(arena)
             drawArena(arena, context)
         }, (1.0/60*1000).toInt())
     }
