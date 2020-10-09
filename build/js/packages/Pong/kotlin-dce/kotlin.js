@@ -39,6 +39,10 @@
   Kotlin.isArrayish = function (a) {
     return Array.isArray(a) || ArrayBuffer.isView(a);
   };
+  Kotlin.getCallableRef = function (name, f) {
+    f.callableName = name;
+    return f;
+  };
   var propertyRefClassMetadataCache = [{mutable: {value: null, implementedInterface: function () {
     return Kotlin.kotlin.reflect.KMutableProperty0;
   }}, immutable: {value: null, implementedInterface: function () {
@@ -2610,6 +2614,47 @@
       this.start_p1gsmm$_0 = start;
       this.endInclusive_jj4lf7$_0 = endInclusive;
     }
+    function ClosedFloatingPointRange() {
+    }
+    ClosedFloatingPointRange.prototype.contains_mef7kx$ = function (value) {
+      return this.lessThanOrEquals_n65qkk$(this.start, value) && this.lessThanOrEquals_n65qkk$(value, this.endInclusive);
+    };
+    ClosedFloatingPointRange.prototype.isEmpty = function () {
+      return !this.lessThanOrEquals_n65qkk$(this.start, this.endInclusive);
+    };
+    ClosedFloatingPointRange.$metadata$ = {kind: Kind_INTERFACE, simpleName: 'ClosedFloatingPointRange', interfaces: [ClosedRange]};
+    function ClosedDoubleRange(start, endInclusive) {
+      this._start_0 = start;
+      this._endInclusive_0 = endInclusive;
+    }
+    Object.defineProperty(ClosedDoubleRange.prototype, 'start', {get: function () {
+      return this._start_0;
+    }});
+    Object.defineProperty(ClosedDoubleRange.prototype, 'endInclusive', {get: function () {
+      return this._endInclusive_0;
+    }});
+    ClosedDoubleRange.prototype.lessThanOrEquals_n65qkk$ = function (a, b) {
+      return a <= b;
+    };
+    ClosedDoubleRange.prototype.contains_mef7kx$ = function (value) {
+      return value >= this._start_0 && value <= this._endInclusive_0;
+    };
+    ClosedDoubleRange.prototype.isEmpty = function () {
+      return !(this._start_0 <= this._endInclusive_0);
+    };
+    ClosedDoubleRange.prototype.equals = function (other) {
+      return Kotlin.isType(other, ClosedDoubleRange) && (this.isEmpty() && other.isEmpty() || (this._start_0 === other._start_0 && this._endInclusive_0 === other._endInclusive_0));
+    };
+    ClosedDoubleRange.prototype.hashCode = function () {
+      return this.isEmpty() ? -1 : (31 * hashCode(this._start_0) | 0) + hashCode(this._endInclusive_0) | 0;
+    };
+    ClosedDoubleRange.prototype.toString = function () {
+      return this._start_0.toString() + '..' + this._endInclusive_0;
+    };
+    ClosedDoubleRange.$metadata$ = {kind: Kind_CLASS, simpleName: 'ClosedDoubleRange', interfaces: [ClosedFloatingPointRange]};
+    function rangeTo_0($receiver, that) {
+      return new ClosedDoubleRange($receiver, that);
+    }
     var Typography_instance = null;
     var Duration$Companion_instance = null;
     var TimeSource$Monotonic_instance = null;
@@ -2843,6 +2888,8 @@
     package$random.boundsErrorMessage_dgzutr$ = boundsErrorMessage;
     package$random.XorWowRandom_init_6xvm5r$ = XorWowRandom_init;
     package$random.XorWowRandom = XorWowRandom;
+    package$ranges.ClosedFloatingPointRange = ClosedFloatingPointRange;
+    package$ranges.rangeTo_38ydlf$ = rangeTo_0;
     package$kotlin.createFailure_tcv7n7$ = createFailure;
     Object.defineProperty(Result, 'Companion', {get: Result$Companion_getInstance});
     Result.Failure = Result$Failure;
