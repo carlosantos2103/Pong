@@ -1,7 +1,7 @@
 import kotlin.browser.window
 
-private const val arenaWidth = 800
-private const val arenaHeight= 500
+private const val arenaWidth = 700
+private const val arenaHeight= 420
 
 /**
  * The application entry point.
@@ -13,10 +13,10 @@ fun main() {
 
         val context = initializeCanvasContext(arenaWidth, arenaHeight)
         var arena = initializeArena(arenaWidth, arenaHeight)
-        var batLocation = arena.bat.location
+        var batLocation = arena.human.bat.location
 
         window.onmousemove = {
-            batLocation = Location(arena.bat.location.x, it.clientY.toDouble())
+            batLocation = Location(arena.human.bat.location.x, it.clientY-90.0)
             true
         }
 
@@ -25,10 +25,13 @@ fun main() {
             true
         }
 
-        window.setInterval({
+        fun animationStep() {
             arena = doStep(arena, batLocation)
             maybePlaySound(arena)
             drawArena(arena, context)
-        }, (1.0/60*1000).toInt())
+        }
+
+
+        window.setInterval(::animationStep, (1.0/60*1000).toInt())
     }
 }

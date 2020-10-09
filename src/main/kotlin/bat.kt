@@ -1,4 +1,6 @@
-import kotlin.random.Random
+import kotlin.math.max
+import kotlin.math.min
+import kotlin.math.sign
 
 /**
  * Defines the representation of the players' bats.
@@ -9,18 +11,29 @@ import kotlin.random.Random
 data class Bat(val location: Location, val width: Double, val height: Double)
 
 /**
+ * Regulats the bat's max speed. The higher, the fast the bat can move.
+ */
+private const val BAT_SPEED = 5.5
+
+/**
  * Gets the horizontal coordinate of the bat's left edge.
  * @param bat   The bat instance
  * @return The bat's left edge
  */
-private fun getBatLeftEdge(bat: Bat) = bat.location.x - bat.width / 2
+fun getBatLeftEdge(bat: Bat, ballRadius: Double) = Line(
+        Location(bat.location.x - bat.width / 2.0,bat.location.y - bat.height / 2.0 - ballRadius),
+        Location(bat.location.x - bat.width / 2.0,bat.location.y + bat.height / 2.0 + ballRadius)
+)
 
 /**
- * Gets the horizontal coordinate of the bat's right edge.
+ * Gets the horizontal coordinate of the bat's left edge.
  * @param bat   The bat instance
- * @return The bat's right edge
+ * @return The bat's left edge
  */
-private fun getBatRightEdge(bat: Bat) = bat.location.x + bat.width / 2
+fun getBatRightEdge(bat: Bat, ballRadius: Double) = Line(
+        Location(bat.location.x + bat.width / 2.0,bat.location.y - bat.height / 2.0 - ballRadius),
+        Location(bat.location.x + bat.width / 2.0,bat.location.y + bat.height / 2.0 + ballRadius)
+)
 
 /**
  * Checks whether the given bat is within the specified bounds.
@@ -63,57 +76,31 @@ fun keepBatArenaInBounds(bat: Bat, arenaHeight: Double, margin: Double): Bat {
 }
 
 /**
- * Checks whether the bat is hitting the ball.
- * @param ball      The ball instance.
- * @param bat       The bat instance.
- * @param batBot    The batBot instance.
+ * Builds a new bat instance from the given one ([bat]) and with a new location [newLocation].
+ * @param bat           The bat instance to be used as a prototype for the new instance.
+ * @param newLocation   The location for the new instance.
+ * @return A [Bat] ]instance with all its properties copied from [bat] and with [newLocation] as its
+ * location.
  */
-fun isBatHittingBall(ball: Ball, bat: Bat, batBot: Bat, previousBallLocation: Location): Boolean{
-    val lBall = Line(previousBallLocation, ball.center)
-    val lBat = Line(
-            Location(getBatLeftEdge(bat), bat.location.y - bat.height / 2.0 - ball.radius),
-            Location(getBatLeftEdge(bat), bat.location.y + bat.height / 2.0 + ball.radius)
-    )
-    val lBatBot = Line(
-            Location(getBatRightEdge(batBot), batBot.location.y - batBot.height / 2.0 - ball.radius),
-            Location(getBatRightEdge(batBot), batBot.location.y + batBot.height / 2.0 + ball.radius)
-    )
-
-    val denominator = (lBat.end.y - lBat.start.y) * (lBall.end.x - lBall.start.x) - (lBat.end.x - lBat.start.x) * (lBall.end.y - lBall.start.y)
-    val uA = ((lBat.end.x - lBat.start.x) * (lBall.start.y - lBat.start.y) - (lBat.end.y - lBat.start.y) * (lBall.start.x - lBat.start.x)) /
-            denominator
-    val uB = ((lBall.end.x - lBall.start.x) * (lBall.start.y - lBat.start.y) - (lBall.end.y - lBall.start.y) * (lBall.start.x - lBat.start.x)) /
-            denominator
-
-    val denominatorBot = (lBatBot.end.y - lBatBot.start.y) * (lBall.end.x - lBall.start.x) - (lBatBot.end.x - lBatBot.start.x) * (lBall.end.y - lBall.start.y)
-    val uABot = ((lBatBot.end.x - lBatBot.start.x) * (lBall.start.y - lBatBot.start.y) - (lBatBot.end.y - lBatBot.start.y) * (lBall.start.x - lBatBot.start.x)) /
-            denominatorBot
-    val uBBot = ((lBall.end.x - lBall.start.x) * (lBall.start.y - lBatBot.start.y) - (lBall.end.y - lBall.start.y) * (lBall.start.x - lBatBot.start.x)) /
-            denominatorBot
-
-    return (uA in 0.0..1.0 && uB in 0.0..1.0 || uABot in 0.0..1.0 && uBBot in 0.0..1.0)
-}
+fun buildBatWith(bat: Bat, newLocation: Location) = Bat(newLocation, bat.width, bat.height)
 
 /**
- * Defelects the ball in the bat
- * @param arena   The arena instance.
+ * Keeps the bat within the arena bounds, regardless of its current position.
+ * @param bat           The bat instance.
+ * @param height        The height of the admissible vertical bounds.
+ * @param margin        The gap to be preserved between the bat and the vertical boundaries.
+ * @return a bat instance located inside the arena bounds.
  */
-fun deflectBall(arena: Arena) : Ball{
-    val cont = if (arena.ball.center.x > arena.width / 2.0)
-        arena.ball.center.y - arena.bat.location.y
-    else
-        arena.ball.center.y - arena.batBot.location.y
+fun keepBatInVerticalBounds(bat: Bat, height: Double, margin: Double) =
+        if (isBatWithinBounds(bat, height, margin)) bat
+        else placeBatWithinBounds(bat, height, margin)
 
-    return Ball(
-            Location(
-                    arena.ball.center.x,
-                    arena.ball.center.y
-            ),
-            arena.ball.radius,
-            Velocity(
-                    dx = -arena.ball.velocity.dx - Random.nextDouble(0.0, 1.3),
-                    dy = arena.ball.velocity.dy + (cont * Random.nextDouble(0.08, 0.18))
-            ),
-            Deflection.BY_BAT
-    )
+/**
+ * Moves the bat towards the ball. Its our little AI :P
+ */
+fun moveTowards(bat: Bat, destination: Location): Bat {
+    val maxDY = destination.y - bat.location.y
+    val actualDY = sign(maxDY) * BAT_SPEED
+    val velocity = Velocity(0.0, if (actualDY > 0) min(actualDY, maxDY) else max(maxDY, actualDY))
+    return buildBatWith(bat, add(bat.location, velocity))
 }

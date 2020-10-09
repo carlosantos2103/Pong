@@ -1,5 +1,4 @@
 import org.w3c.dom.Audio
-import org.w3c.dom.HTMLAudioElement
 
 /**
  * Singleton object used to play the game's sounds.
@@ -15,9 +14,10 @@ private object Sounds {
  * @property arena   The arena's instande (its center).
  */
 fun maybePlaySound(arena: Arena) {
-    when (arena.ball.deflection) {
-        Deflection.BY_BAT -> Sounds.batHit.play()
-        Deflection.DEFAULT -> Sounds.defaultHit.play()
-        Deflection.RESTART -> Sounds.pointHit.play()
-    }
+    if (arena.running)
+        when (arena.ball.deflection) {
+            Deflection.BY_BAT -> Sounds.batHit.play()
+            Deflection.DEFAULT -> Sounds.defaultHit.play()
+            Deflection.RESTART -> Sounds.pointHit.play()
+        }
 }

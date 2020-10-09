@@ -1,27 +1,26 @@
-import org.w3c.dom.Audio
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.random.Random
 
 /**Defines the representation of the game's arena.
- * @property bat        The player's bat.
- * @property bat        The bot's bat.
- * @property ball       The ball.
- * @property width      The width of the arena.
- * @property height     The height of the arena.
- * @property score      The current score.
- * @property scoreBot   The current score.
+ * @property human          The human's player.
+ * @property computer       The computer's player.
+ * @property ball           The ball.
+ * @property width          The width of the arena.
+ * @property height         The height of the arena.
+ * @property running        The arena status.
  */
 data class Arena(
-        val bat: Bat,
-        val batBot: Bat,
+        val human: Player,
+        val computer: Player,
         val ball: Ball,
         val width: Int,
         val height: Int,
-        var score: Int,
-        var scoreBot: Int
+        var running: Boolean = false
 )
+
+const val MARGIN_Y = 10.0
 
 /**
  * Creates an arena instance with the specified dimension.
@@ -30,16 +29,15 @@ data class Arena(
  * @return The newly created arena instance.
  */
 fun initializeArena(width: Int, height: Int): Arena {
-    val ball = Ball(
-            Location(width / 2.0, height / 2.0),
-            5.0,
-            Velocity(0.0, 0.0)
-    )
+    val ball = createStationaryBall(width, height)
+    val batMargin = 15.0
+    val batWith = 7.0
+    val batHeight = 80.0
 
-    val bat = Bat(Location(width - 15.0, height / 2.0), 7.0, 80.0)
-    val batBot = Bat(Location(15.0, ball.center.y), 7.0, 80.0)
+    val human = Player(Bat(Location(width - batMargin, height / 2.0), batWith, batHeight))
+    val computer = Player(Bat(Location(batMargin, height / 2.0), batWith, batHeight))
 
-    return Arena(bat, batBot, ball, width, height, 0, 0)
+    return Arena(human, computer, ball, width, height, false)
 }
 
 /**
@@ -47,8 +45,63 @@ fun initializeArena(width: Int, height: Int): Arena {
  */
 private fun getInitialVelocity(): Velocity {
     val alpha = Random.nextDouble(-PI / 5, PI / 5)
-    val magnitude = 9.0
+    val magnitude = 8.5
     return Velocity(magnitude * cos(alpha), magnitude * sin(alpha))
+}
+
+/**
+ * Checks whether the bat is hitting the ball.
+ * @param ball          The ball instance.
+ * @param batEdge       The bat's edge instance.
+ */
+fun isBatHittingBall(batEdge: Line, ball: Ball, previousBallLocation: Location): Boolean{
+    val lBall = Line(previousBallLocation, ball.center)
+
+    val denominator = (batEdge.end.y - batEdge.start.y) * (lBall.end.x - lBall.start.x) - (batEdge.end.x - batEdge.start.x) * (lBall.end.y - lBall.start.y)
+    val uA = ((batEdge.end.x - batEdge.start.x) * (lBall.start.y - batEdge.start.y) - (batEdge.end.y - batEdge.start.y) * (lBall.start.x - batEdge.start.x)) /
+            denominator
+    val uB = ((lBall.end.x - lBall.start.x) * (lBall.start.y - batEdge.start.y) - (lBall.end.y - lBall.start.y) * (lBall.start.x - batEdge.start.x)) /
+            denominator
+
+    return (uA in 0.0..1.0 && uB in 0.0..1.0)
+}
+
+/**
+ * Defelects the ball in the bat
+ * @param arena   The arena instance.
+ */
+fun deflectBall(arena: Arena) : Ball{
+    val cont = if (arena.ball.velocity.dx > 0)
+        arena.ball.center.y - arena.human.bat.location.y
+    else
+        arena.ball.center.y - arena.computer.bat.location.y
+
+    return Ball(
+            Location(
+                    arena.ball.center.x + if (arena.ball.velocity.dx < 0) arena.ball.radius else -arena.ball.radius,
+                    arena.ball.center.y
+            ),
+            arena.ball.radius,
+            Velocity(
+                    dx = -arena.ball.velocity.dx - Random.nextDouble(0.0, 1.3),
+                    dy = arena.ball.velocity.dy + (cont * Random.nextDouble(0.08, 0.18))
+            ),
+            Deflection.BY_BAT
+    )
+}
+
+/**
+ * Deflects the ball if it encounters a bat.
+ * @param arena The arena instance.
+ * @param ball The updated ball instance
+ * @return The ball deflected in the bat or not
+ */
+fun maybeDeflectBall(arena: Arena, ball: Ball): Ball{
+    return when{
+        isBatHittingBall(getBatRightEdge(arena.computer.bat, arena.ball.radius), ball, arena.ball.center) -> deflectBall(arena)
+        isBatHittingBall(getBatLeftEdge(arena.human.bat, arena.ball.radius), ball, arena.ball.center) -> deflectBall(arena)
+        else -> ball
+    }
 }
 
 /**
@@ -57,38 +110,32 @@ private fun getInitialVelocity(): Velocity {
  * @param batLocation   The location of the player's bat.
  */
 fun doStep(arena: Arena, batLocation: Location) : Arena {
-    val bat = keepBatArenaInBounds(
-            Bat(batLocation, 6.5, 80.0),
+    val humanBat = keepBatArenaInBounds(
+            Bat(batLocation, arena.human.bat.width, arena.human.bat.height),
             arena.height.toDouble(),
-            6.0
+            MARGIN_Y
     )
-    val batBot = keepBatArenaInBounds(
-            Bat(Location(15.0, arena.ball.center.y), 6.5, 80.0),
-            arena.height.toDouble(),
-            6.0
-    )
-    val startBall = Ball(
-            Location(arena.width / 2.0, arena.height / 2.0),
-            arena.ball.radius,
-            Velocity(dx = 0.0, dy = 0.0),
-            Deflection.RESTART
-    )
+    val computerBat = if (isBallMoving(arena.ball))
+                keepBatInVerticalBounds(moveTowards(arena.computer.bat, arena.ball.center), arena.height.toDouble(), MARGIN_Y)
+            else
+                buildBatWith(arena.computer.bat, Location(arena.computer.bat.location.x, arena.ball.center.y))
 
-    val ball = moveBall(arena.ball, arena.width.toDouble(), arena.height.toDouble())
-    val newBall = if (isBatHittingBall(ball, bat, batBot, arena.ball.center)) deflectBall(arena)
-        else ball
+    val ball = if (arena.running)
+            maybeDeflectBall(
+                    arena,
+                    moveBall(arena.ball, arena.width.toDouble(), arena.height.toDouble())
+            )
+            else arena.ball
 
-    println(isBatHittingBall(ball, bat, batBot, arena.ball.center))
+    val result = checkMoveResult(ball, arena.width)
 
     return Arena(
-            bat,
-            batBot,
-            if(!isBallInHorizontalBounds(newBall, arena.width.toDouble())) startBall
-                else newBall,
+            Player(humanBat, if (result==MoveResult.COMPUTER_LOSS) arena.human.score + 1 else arena.human.score),
+            Player(computerBat, if (result==MoveResult.HUMAN_LOSS) arena.computer.score + 1 else arena.computer.score),
+            if(!isBallInHorizontalBounds(ball, arena.width.toDouble())) createStationaryBall(arena.width, arena.height) else ball,
             arena.width,
             arena.height,
-            if(isLoss(newBall, arena.width)) arena.score + 1 else arena.score,
-            if(isBotLoss(newBall, arena.width)) arena.scoreBot + 1 else arena.scoreBot
+            arena.running
     )
 }
 
@@ -98,17 +145,25 @@ fun doStep(arena: Arena, batLocation: Location) : Arena {
  * @return The arena instance bearing a moving ball.
  */
 fun start(arena: Arena): Arena{
-    return if (isBallMoving(arena.ball)) arena
-    else Arena(
-            arena.bat, arena.batBot,
-            Ball(arena.ball.center, arena.ball.radius, getInitialVelocity()),
-            arena.width,
-            arena.height,
-            arena.score,
-            arena.scoreBot
-    )
+    return when {
+        !isBallMoving(arena.ball) -> Arena(
+                arena.human,
+                arena.computer,
+                Ball(arena.ball.center, arena.ball.radius, getInitialVelocity()),
+                arena.width,
+                arena.height,
+                true
+        )
+        else -> Arena(
+                arena.human,
+                arena.computer,
+                arena.ball,
+                arena.width,
+                arena.height,
+                !arena.running
+        )
+    }
 }
-
 
 
 

@@ -11,8 +11,6 @@ data class Location(val x: Double, val y: Double)
  * @property dy  The vertical coordinate variation.
  */
 data class Velocity(val dx: Double, val dy: Double)
-//data class Acceleration(val dvx: Double, val dvy: Double)
-//data class Color(val rgb: String)
 
 /**
  * Adds to the given location a location variation (velocity).

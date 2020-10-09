@@ -36,7 +36,7 @@ fun drawBackground(context: CanvasRenderingContext2D){
     context.lineWidth = 3.0
     context.setLineDash(arrayOf(3.0, 8.0))
     context.moveTo(context.canvas.width / 2.0, margin)
-    context.lineTo(context.canvas.width / 2.0, context.canvas.height - margin / 2.0)
+    context.lineTo(context.canvas.width / 2.0, context.canvas.height - margin)
     context.stroke()
 }
 
@@ -77,7 +77,7 @@ fun drawScore(arena: Arena, context: CanvasRenderingContext2D){
     context.font = "25pt verdana"
     context.textAlign = CanvasTextAlign.CENTER
     context.fillText(
-            arena.score.toString() + "        " + arena.scoreBot.toString(),
+            arena.computer.score.toString() + "        " + arena.human.score.toString(),
             context.canvas.width / 2.0,
             45.0,
             200.0
@@ -91,8 +91,8 @@ fun drawScore(arena: Arena, context: CanvasRenderingContext2D){
  */
 fun drawArena(arena: Arena, context: CanvasRenderingContext2D){
     drawBackground(context)
-    drawBat(arena.bat, context)
-    drawBat(arena.batBot, context)
+    drawBat(arena.human.bat, context)
+    drawBat(arena.computer.bat, context)
     drawBall(arena.ball, context)
     drawScore(arena, context)
 }
