@@ -1,8 +1,6 @@
-import org.w3c.dom.CENTER
-import org.w3c.dom.CanvasRenderingContext2D
-import org.w3c.dom.CanvasTextAlign
-import org.w3c.dom.HTMLCanvasElement
+import org.w3c.dom.*
 import kotlin.browser.document
+import kotlin.dom.appendText
 import kotlin.math.PI
 
 /**
@@ -18,6 +16,30 @@ fun initializeCanvasContext(width: Int, height: Int): CanvasRenderingContext2D{
     canvas.setAttribute("class", "arena")
     document.body?.appendChild(canvas)
     return canvas.getContext("2d") as CanvasRenderingContext2D
+}
+
+fun initializeEasyButtonContext(): HTMLButtonElement{
+    val canvas = document.createElement("button") as HTMLButtonElement
+    canvas.setAttribute("class", "buttoneasy")
+    canvas.appendText("Fácil")
+    document.body?.appendChild(canvas)
+    return canvas
+}
+
+fun initializeNormalButtonContext(): HTMLButtonElement{
+    val canvas = document.createElement("button") as HTMLButtonElement
+    canvas.setAttribute("class", "buttonnormal")
+    canvas.appendText("Normal")
+    document.body?.appendChild(canvas)
+    return canvas
+}
+
+fun initializeHardButtonContext(): HTMLButtonElement{
+    val canvas = document.createElement("button") as HTMLButtonElement
+    canvas.setAttribute("class", "buttonhard")
+    canvas.appendText("Difícil")
+    document.body?.appendChild(canvas)
+    return canvas
 }
 
 /**

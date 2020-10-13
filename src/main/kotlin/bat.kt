@@ -13,7 +13,7 @@ data class Bat(val location: Location, val width: Double, val height: Double)
 /**
  * Regulats the bat's max speed. The higher, the fast the bat can move.
  */
-private const val BAT_SPEED = 5.5
+private const val BAT_SPEED = 6
 
 /**
  * Gets the horizontal coordinate of the bat's left edge.
@@ -98,9 +98,10 @@ fun keepBatInVerticalBounds(bat: Bat, height: Double, margin: Double) =
 /**
  * Moves the bat towards the ball. Its our little AI :P
  */
-fun moveTowards(bat: Bat, destination: Location): Bat {
+fun moveTowards(bat: Bat, destination: Location, level: Level): Bat {
+    val multiplier = if (level == Level.EASY) 0.7 else if (level == Level.HARD) 1.4 else 1.0
     val maxDY = destination.y - bat.location.y
-    val actualDY = sign(maxDY) * BAT_SPEED
+    val actualDY = sign(maxDY) * BAT_SPEED * multiplier
     val velocity = Velocity(0.0, if (actualDY > 0) min(actualDY, maxDY) else max(maxDY, actualDY))
     return buildBatWith(bat, add(bat.location, velocity))
 }

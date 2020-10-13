@@ -13,20 +13,50 @@ body {
     outline-color: rgb(255, 250, 179);
 }
 
-.button {
+.buttoneasy {
   border: none;
   color: white;
   padding: 7px 30px;
-  margin-left: auto;
-  margin-right: auto;
+  margin-top: 12px;
   text-align: center;
   text-decoration: none;
-  display: inline-block;
   font-size: 14px;
-  margin-top: 290px;
-  margin-left: 100px;
-  position: relative;
   cursor: pointer;
+  background-color: rgba(0, 153, 0, 0.6);
+  position: absolute;
+  left: 50%;
+  -ms-transform: translateX(-50%);
+  transform: translateX(-50%);
 }
 
-.pausa {background-color: rgba(242, 242, 242, 0.2)}
+.buttonnormal {
+  border: none;
+  color: white;
+  padding: 7px 30px;
+  margin-top: 45px;
+  text-align: center;
+  text-decoration: none;
+  font-size: 14px;
+  cursor: pointer;
+  background-color: rgba(0, 153, 153, 0.6);
+  position: absolute;
+  left: 50%;
+  -ms-transform: translateX(-50%);
+  transform: translateX(-50%);
+}
+
+.buttonhard {
+  border: none;
+  color: white;
+  padding: 7px 30px;
+  margin-top: 78px;
+  text-align: center;
+  text-decoration: none;
+  font-size: 14px;
+  cursor: pointer;
+  background-color: rgba(153, 0, 0, 0.6);
+  position: absolute;
+  left: 50%;
+  -ms-transform: translateX(-50%);
+  transform: translateX(-50%);
+}

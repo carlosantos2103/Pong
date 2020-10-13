@@ -1,8 +1,7 @@
 {
-  mode: 'production',
+  mode: 'development',
   resolve: {
     modules: [
-      'D:\\00\\Programacao\\KotlinJs\\Pong\\build\\js\\packages\\Pong\\kotlin-dce',
       'node_modules'
     ]
   },
@@ -20,7 +19,7 @@
   },
   entry: {
     main: [
-      'D:\\00\\Programacao\\KotlinJs\\Pong\\build\\js\\packages\\Pong\\kotlin-dce\\Pong.js'
+      'D:\\00\\Programacao\\KotlinJs\\Pong\\build\\js\\packages\\Pong\\kotlin\\Pong.js'
     ]
   },
   output: {
@@ -29,5 +28,16 @@
     library: 'Pong',
     libraryTarget: 'umd'
   },
-  devtool: 'source-map'
+  devtool: 'eval-source-map',
+  devServer: {
+    inline: true,
+    lazy: false,
+    noInfo: true,
+    open: true,
+    overlay: false,
+    port: 8080,
+    contentBase: [
+      'D:\\00\\Programacao\\KotlinJs\\Pong\\build\\processedResources\\Js\\main'
+    ]
+  }
 }

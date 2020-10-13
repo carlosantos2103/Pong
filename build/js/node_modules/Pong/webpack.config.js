@@ -1,5 +1,5 @@
 var config = {
-  mode: 'production',
+  mode: 'development',
   resolve: {
     modules: [
       "node_modules"
@@ -13,7 +13,7 @@ var config = {
 
 // entry
 config.entry = {
-    main: ["D:\\00\\Programacao\\KotlinJs\\Pong\\build\\js\\packages\\Pong\\kotlin-dce\\Pong.js"]
+    main: ["D:\\00\\Programacao\\KotlinJs\\Pong\\build\\js\\packages\\Pong\\kotlin\\Pong.js"]
 };
 
 config.output = {
@@ -27,16 +27,26 @@ config.output = {
     libraryTarget: "umd",
 };
 
-// resolve modules
-config.resolve.modules.unshift("D:\\00\\Programacao\\KotlinJs\\Pong\\build\\js\\packages\\Pong\\kotlin-dce")
-
 // source maps
 config.module.rules.push({
         test: /\.js$/,
         use: ["kotlin-source-map-loader"],
         enforce: "pre"
 });
-config.devtool = 'source-map';
+config.devtool = 'eval-source-map';
+
+// dev server
+config.devServer = {
+  "inline": true,
+  "lazy": false,
+  "noInfo": true,
+  "open": true,
+  "overlay": false,
+  "port": 8080,
+  "contentBase": [
+    "D:\\00\\Programacao\\KotlinJs\\Pong\\build\\processedResources\\Js\\main"
+  ]
+};
 
 // save evaluated config file
 var util = require('util');

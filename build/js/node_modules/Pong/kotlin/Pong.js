@@ -11,22 +11,27 @@
 }(this, function (_, Kotlin) {
   'use strict';
   var Kind_CLASS = Kotlin.Kind.CLASS;
+  var Enum = Kotlin.kotlin.Enum;
+  var throwISE = Kotlin.throwISE;
   var Random = Kotlin.kotlin.random.Random;
   var math = Kotlin.kotlin.math;
   var rangeTo = Kotlin.kotlin.ranges.rangeTo_38ydlf$;
   var equals = Kotlin.equals;
   var Math_0 = Math;
-  var Enum = Kotlin.kotlin.Enum;
-  var throwISE = Kotlin.throwISE;
   var Unit = Kotlin.kotlin.Unit;
   var getCallableRef = Kotlin.getCallableRef;
   var Kind_OBJECT = Kotlin.Kind.OBJECT;
   var throwCCE = Kotlin.throwCCE;
+  var appendText = Kotlin.kotlin.dom.appendText_46n0ku$;
+  Level.prototype = Object.create(Enum.prototype);
+  Level.prototype.constructor = Level;
   Deflection.prototype = Object.create(Enum.prototype);
   Deflection.prototype.constructor = Deflection;
   MoveResult.prototype = Object.create(Enum.prototype);
   MoveResult.prototype.constructor = MoveResult;
-  function Arena(human, computer, ball, width, height, running) {
+  function Arena(human, computer, ball, width, height, level, running) {
+    if (level === void 0)
+      level = Level$NORMAL_getInstance();
     if (running === void 0)
       running = false;
     this.human = human;
@@ -34,6 +39,7 @@
     this.ball = ball;
     this.width = width;
     this.height = height;
+    this.level = level;
     this.running = running;
   }
   Arena.$metadata$ = {
@@ -57,13 +63,16 @@
     return this.height;
   };
   Arena.prototype.component6 = function () {
+    return this.level;
+  };
+  Arena.prototype.component7 = function () {
     return this.running;
   };
-  Arena.prototype.copy_xruouw$ = function (human, computer, ball, width, height, running) {
-    return new Arena(human === void 0 ? this.human : human, computer === void 0 ? this.computer : computer, ball === void 0 ? this.ball : ball, width === void 0 ? this.width : width, height === void 0 ? this.height : height, running === void 0 ? this.running : running);
+  Arena.prototype.copy_nesbf4$ = function (human, computer, ball, width, height, level, running) {
+    return new Arena(human === void 0 ? this.human : human, computer === void 0 ? this.computer : computer, ball === void 0 ? this.ball : ball, width === void 0 ? this.width : width, height === void 0 ? this.height : height, level === void 0 ? this.level : level, running === void 0 ? this.running : running);
   };
   Arena.prototype.toString = function () {
-    return 'Arena(human=' + Kotlin.toString(this.human) + (', computer=' + Kotlin.toString(this.computer)) + (', ball=' + Kotlin.toString(this.ball)) + (', width=' + Kotlin.toString(this.width)) + (', height=' + Kotlin.toString(this.height)) + (', running=' + Kotlin.toString(this.running)) + ')';
+    return 'Arena(human=' + Kotlin.toString(this.human) + (', computer=' + Kotlin.toString(this.computer)) + (', ball=' + Kotlin.toString(this.ball)) + (', width=' + Kotlin.toString(this.width)) + (', height=' + Kotlin.toString(this.height)) + (', level=' + Kotlin.toString(this.level)) + (', running=' + Kotlin.toString(this.running)) + ')';
   };
   Arena.prototype.hashCode = function () {
     var result = 0;
@@ -72,12 +81,61 @@
     result = result * 31 + Kotlin.hashCode(this.ball) | 0;
     result = result * 31 + Kotlin.hashCode(this.width) | 0;
     result = result * 31 + Kotlin.hashCode(this.height) | 0;
+    result = result * 31 + Kotlin.hashCode(this.level) | 0;
     result = result * 31 + Kotlin.hashCode(this.running) | 0;
     return result;
   };
   Arena.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.human, other.human) && Kotlin.equals(this.computer, other.computer) && Kotlin.equals(this.ball, other.ball) && Kotlin.equals(this.width, other.width) && Kotlin.equals(this.height, other.height) && Kotlin.equals(this.running, other.running)))));
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.human, other.human) && Kotlin.equals(this.computer, other.computer) && Kotlin.equals(this.ball, other.ball) && Kotlin.equals(this.width, other.width) && Kotlin.equals(this.height, other.height) && Kotlin.equals(this.level, other.level) && Kotlin.equals(this.running, other.running)))));
   };
+  function Level(name, ordinal) {
+    Enum.call(this);
+    this.name$ = name;
+    this.ordinal$ = ordinal;
+  }
+  function Level_initFields() {
+    Level_initFields = function () {
+    };
+    Level$EASY_instance = new Level('EASY', 0);
+    Level$NORMAL_instance = new Level('NORMAL', 1);
+    Level$HARD_instance = new Level('HARD', 2);
+  }
+  var Level$EASY_instance;
+  function Level$EASY_getInstance() {
+    Level_initFields();
+    return Level$EASY_instance;
+  }
+  var Level$NORMAL_instance;
+  function Level$NORMAL_getInstance() {
+    Level_initFields();
+    return Level$NORMAL_instance;
+  }
+  var Level$HARD_instance;
+  function Level$HARD_getInstance() {
+    Level_initFields();
+    return Level$HARD_instance;
+  }
+  Level.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Level',
+    interfaces: [Enum]
+  };
+  function Level$values() {
+    return [Level$EASY_getInstance(), Level$NORMAL_getInstance(), Level$HARD_getInstance()];
+  }
+  Level.values = Level$values;
+  function Level$valueOf(name) {
+    switch (name) {
+      case 'EASY':
+        return Level$EASY_getInstance();
+      case 'NORMAL':
+        return Level$NORMAL_getInstance();
+      case 'HARD':
+        return Level$HARD_getInstance();
+      default:throwISE('No enum constant Level.' + name);
+    }
+  }
+  Level.valueOf_61zpoe$ = Level$valueOf;
   var MARGIN_Y;
   function initializeArena(width, height) {
     var ball = createStationaryBall(width, height);
@@ -86,7 +144,7 @@
     var batHeight = 80.0;
     var human = new Player(new Bat(new Location(width - batMargin, height / 2.0), batWith, batHeight));
     var computer = new Player(new Bat(new Location(batMargin, height / 2.0), batWith, batHeight));
-    return new Arena(human, computer, ball, width, height, false);
+    return new Arena(human, computer, ball, width, height, Level$NORMAL_getInstance(), false);
   }
   function getInitialVelocity() {
     var alpha = Random.Default.nextDouble_lu1900$(-math.PI / 5, math.PI / 5);
@@ -116,17 +174,31 @@
   }
   function doStep(arena, batLocation) {
     var humanBat = keepBatArenaInBounds(new Bat(batLocation, arena.human.bat.width, arena.human.bat.height), arena.height, MARGIN_Y);
-    var computerBat = isBallMoving(arena.ball) ? keepBatInVerticalBounds(moveTowards(arena.computer.bat, arena.ball.center), arena.height, MARGIN_Y) : buildBatWith(arena.computer.bat, new Location(arena.computer.bat.location.x, arena.ball.center.y));
+    var computerBat = isBallMoving(arena.ball) ? keepBatInVerticalBounds(moveTowards(arena.computer.bat, arena.ball.center, arena.level), arena.height, MARGIN_Y) : buildBatWith(arena.computer.bat, new Location(arena.computer.bat.location.x, arena.ball.center.y));
     var ball = arena.running ? maybeDeflectBall(arena, moveBall(arena.ball, arena.width, arena.height)) : arena.ball;
     var result = checkMoveResult(ball, arena.width);
-    return new Arena(new Player(humanBat, equals(result, MoveResult$COMPUTER_LOSS_getInstance()) ? arena.human.score + 1 | 0 : arena.human.score), new Player(computerBat, equals(result, MoveResult$HUMAN_LOSS_getInstance()) ? arena.computer.score + 1 | 0 : arena.computer.score), !isBallInHorizontalBounds(ball, arena.width) ? createStationaryBall(arena.width, arena.height) : ball, arena.width, arena.height, arena.running);
+    return new Arena(new Player(humanBat, equals(result, MoveResult$COMPUTER_LOSS_getInstance()) ? arena.human.score + 1 | 0 : arena.human.score), new Player(computerBat, equals(result, MoveResult$HUMAN_LOSS_getInstance()) ? arena.computer.score + 1 | 0 : arena.computer.score), !isBallInHorizontalBounds(ball, arena.width) ? createStationaryBall(arena.width, arena.height) : ball, arena.width, arena.height, arena.level, arena.running);
+  }
+  function changeLevel(arena, level) {
+    var tmp$;
+    switch (level.name) {
+      case 'NORMAL':
+        tmp$ = new Arena(arena.human, arena.computer, arena.ball, arena.width, arena.height, Level$NORMAL_getInstance(), arena.running);
+        break;
+      case 'EASY':
+        tmp$ = new Arena(arena.human, arena.computer, arena.ball, arena.width, arena.height, Level$EASY_getInstance(), arena.running);
+        break;
+      default:tmp$ = new Arena(arena.human, arena.computer, arena.ball, arena.width, arena.height, Level$HARD_getInstance(), arena.running);
+        break;
+    }
+    return tmp$;
   }
   function start(arena) {
     var tmp$;
     if (!isBallMoving(arena.ball))
-      tmp$ = new Arena(arena.human, arena.computer, new Ball(arena.ball.center, arena.ball.radius, getInitialVelocity()), arena.width, arena.height, true);
+      tmp$ = new Arena(arena.human, arena.computer, new Ball(arena.ball.center, arena.ball.radius, getInitialVelocity()), arena.width, arena.height, arena.level, true);
     else
-      tmp$ = new Arena(arena.human, arena.computer, arena.ball, arena.width, arena.height, !arena.running);
+      tmp$ = new Arena(arena.human, arena.computer, arena.ball, arena.width, arena.height, arena.level, !arena.running);
     return tmp$;
   }
   var X_MARGIN;
@@ -364,9 +436,10 @@
   function keepBatInVerticalBounds(bat, height, margin) {
     return isBatWithinBounds(bat, height, margin) ? bat : placeBatWithinBounds(bat, height, margin);
   }
-  function moveTowards(bat, destination) {
+  function moveTowards(bat, destination, level) {
+    var multiplier = level === Level$EASY_getInstance() ? 0.7 : level === Level$HARD_getInstance() ? 1.4 : 1.0;
     var maxDY = destination.y - bat.location.y;
-    var actualDY = Math_0.sign(maxDY) * BAT_SPEED;
+    var actualDY = Math_0.sign(maxDY) * 6 * multiplier;
     var velocity = new Velocity(0.0, actualDY > 0 ? Math_0.min(actualDY, maxDY) : Math_0.max(maxDY, actualDY));
     return buildBatWith(bat, add(bat.location, velocity));
   }
@@ -473,6 +546,24 @@
   }
   function main$lambda$lambda_0(closure$arena) {
     return function (it) {
+      closure$arena.v = changeLevel(closure$arena.v, Level$EASY_getInstance());
+      return true;
+    };
+  }
+  function main$lambda$lambda_1(closure$arena) {
+    return function (it) {
+      closure$arena.v = changeLevel(closure$arena.v, Level$NORMAL_getInstance());
+      return true;
+    };
+  }
+  function main$lambda$lambda_2(closure$arena) {
+    return function (it) {
+      closure$arena.v = changeLevel(closure$arena.v, Level$HARD_getInstance());
+      return true;
+    };
+  }
+  function main$lambda$lambda_3(closure$arena) {
+    return function (it) {
       closure$arena.v = start(closure$arena.v);
       return true;
     };
@@ -486,10 +577,16 @@
   }
   function main$lambda(it) {
     var context = initializeCanvasContext(700, 420);
+    var easyButton = initializeEasyButtonContext();
+    var normalButton = initializeNormalButtonContext();
+    var hardButton = initializeHardButtonContext();
     var arena = {v: initializeArena(700, 420)};
     var batLocation = {v: arena.v.human.bat.location};
     window.onmousemove = main$lambda$lambda(arena, batLocation);
-    context.canvas.onclick = main$lambda$lambda_0(arena);
+    easyButton.onclick = main$lambda$lambda_0(arena);
+    normalButton.onclick = main$lambda$lambda_1(arena);
+    hardButton.onclick = main$lambda$lambda_2(arena);
+    context.canvas.onclick = main$lambda$lambda_3(arena);
     var animationStep = main$lambda$animationStep(arena, batLocation, context);
     return window.setInterval(getCallableRef('animationStep', function () {
       return animationStep(), Unit;
@@ -567,6 +664,30 @@
     (tmp$_0 = document.body) != null ? tmp$_0.appendChild(canvas) : null;
     return Kotlin.isType(tmp$_1 = canvas.getContext('2d'), CanvasRenderingContext2D) ? tmp$_1 : throwCCE();
   }
+  function initializeEasyButtonContext() {
+    var tmp$, tmp$_0;
+    var canvas = Kotlin.isType(tmp$ = document.createElement('button'), HTMLButtonElement) ? tmp$ : throwCCE();
+    canvas.setAttribute('class', 'buttoneasy');
+    appendText(canvas, 'F\xE1cil');
+    (tmp$_0 = document.body) != null ? tmp$_0.appendChild(canvas) : null;
+    return canvas;
+  }
+  function initializeNormalButtonContext() {
+    var tmp$, tmp$_0;
+    var canvas = Kotlin.isType(tmp$ = document.createElement('button'), HTMLButtonElement) ? tmp$ : throwCCE();
+    canvas.setAttribute('class', 'buttonnormal');
+    appendText(canvas, 'Normal');
+    (tmp$_0 = document.body) != null ? tmp$_0.appendChild(canvas) : null;
+    return canvas;
+  }
+  function initializeHardButtonContext() {
+    var tmp$, tmp$_0;
+    var canvas = Kotlin.isType(tmp$ = document.createElement('button'), HTMLButtonElement) ? tmp$ : throwCCE();
+    canvas.setAttribute('class', 'buttonhard');
+    appendText(canvas, 'Dif\xEDcil');
+    (tmp$_0 = document.body) != null ? tmp$_0.appendChild(canvas) : null;
+    return canvas;
+  }
   function drawBackground(context) {
     var margin = 15.0;
     context.fillStyle = '#333300';
@@ -603,6 +724,16 @@
     drawScore(arena, context);
   }
   _.Arena = Arena;
+  Object.defineProperty(Level, 'EASY', {
+    get: Level$EASY_getInstance
+  });
+  Object.defineProperty(Level, 'NORMAL', {
+    get: Level$NORMAL_getInstance
+  });
+  Object.defineProperty(Level, 'HARD', {
+    get: Level$HARD_getInstance
+  });
+  _.Level = Level;
   Object.defineProperty(_, 'MARGIN_Y', {
     get: function () {
       return MARGIN_Y;
@@ -613,6 +744,7 @@
   _.deflectBall_11tko7$ = deflectBall;
   _.maybeDeflectBall_tyckp0$ = maybeDeflectBall;
   _.doStep_5hh52y$ = doStep;
+  _.changeLevel_5bxt27$ = changeLevel;
   _.start_11tko7$ = start;
   Object.defineProperty(_, 'X_MARGIN', {
     get: function () {
@@ -653,7 +785,7 @@
   _.keepBatArenaInBounds_4if5p5$ = keepBatArenaInBounds;
   _.buildBatWith_2ehqr0$ = buildBatWith;
   _.keepBatInVerticalBounds_4if5p5$ = keepBatInVerticalBounds;
-  _.moveTowards_2ehqr0$ = moveTowards;
+  _.moveTowards_oqiw6c$ = moveTowards;
   _.Location = Location;
   _.Velocity = Velocity;
   _.add_bk32fg$ = add;
@@ -662,6 +794,9 @@
   _.Player = Player;
   _.maybePlaySound_11tko7$ = maybePlaySound;
   _.initializeCanvasContext_vux9f0$ = initializeCanvasContext;
+  _.initializeEasyButtonContext = initializeEasyButtonContext;
+  _.initializeNormalButtonContext = initializeNormalButtonContext;
+  _.initializeHardButtonContext = initializeHardButtonContext;
   _.drawBackground_f69bme$ = drawBackground;
   _.drawBat_84wou7$ = drawBat;
   _.drawBall_k9q4if$ = drawBall;
@@ -670,7 +805,7 @@
   MARGIN_Y = 10.0;
   X_MARGIN = 7.0;
   Y_MARGIN = 7.0;
-  BAT_SPEED = 5.5;
+  BAT_SPEED = 6;
   arenaWidth = 700;
   arenaHeight = 420;
   main();

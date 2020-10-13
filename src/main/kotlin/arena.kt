@@ -17,8 +17,14 @@ data class Arena(
         val ball: Ball,
         val width: Int,
         val height: Int,
+        val level: Level = Level.NORMAL,
         var running: Boolean = false
 )
+
+/**
+ * Defines the Level wanted by the player
+ */
+enum class Level { EASY, NORMAL, HARD }
 
 const val MARGIN_Y = 10.0
 
@@ -37,7 +43,7 @@ fun initializeArena(width: Int, height: Int): Arena {
     val human = Player(Bat(Location(width - batMargin, height / 2.0), batWith, batHeight))
     val computer = Player(Bat(Location(batMargin, height / 2.0), batWith, batHeight))
 
-    return Arena(human, computer, ball, width, height, false)
+    return Arena(human, computer, ball, width, height, Level.NORMAL, false)
 }
 
 /**
@@ -116,7 +122,7 @@ fun doStep(arena: Arena, batLocation: Location) : Arena {
             MARGIN_Y
     )
     val computerBat = if (isBallMoving(arena.ball))
-                keepBatInVerticalBounds(moveTowards(arena.computer.bat, arena.ball.center), arena.height.toDouble(), MARGIN_Y)
+                keepBatInVerticalBounds(moveTowards(arena.computer.bat, arena.ball.center, arena.level), arena.height.toDouble(), MARGIN_Y)
             else
                 buildBatWith(arena.computer.bat, Location(arena.computer.bat.location.x, arena.ball.center.y))
 
@@ -135,8 +141,47 @@ fun doStep(arena: Arena, batLocation: Location) : Arena {
             if(!isBallInHorizontalBounds(ball, arena.width.toDouble())) createStationaryBall(arena.width, arena.height) else ball,
             arena.width,
             arena.height,
+            arena.level,
             arena.running
     )
+}
+
+/**
+ * Changes the level of the game
+ * @param arena The arena instance.
+ * @param level The new level
+ * @return The arena instance bearing a moving ball.
+ */
+fun changeLevel(arena: Arena, level: Level): Arena{
+    return when (level) {
+        Level.NORMAL -> Arena(
+                arena.human,
+                arena.computer,
+                arena.ball,
+                arena.width,
+                arena.height,
+                Level.NORMAL,
+                arena.running
+        )
+        Level.EASY -> Arena(
+                arena.human,
+                arena.computer,
+                arena.ball,
+                arena.width,
+                arena.height,
+                Level.EASY,
+                arena.running
+        )
+        else -> Arena(
+                arena.human,
+                arena.computer,
+                arena.ball,
+                arena.width,
+                arena.height,
+                Level.HARD,
+                arena.running
+        )
+    }
 }
 
 /**
@@ -152,6 +197,7 @@ fun start(arena: Arena): Arena{
                 Ball(arena.ball.center, arena.ball.radius, getInitialVelocity()),
                 arena.width,
                 arena.height,
+                arena.level,
                 true
         )
         else -> Arena(
@@ -160,6 +206,7 @@ fun start(arena: Arena): Arena{
                 arena.ball,
                 arena.width,
                 arena.height,
+                arena.level,
                 !arena.running
         )
     }
