@@ -690,7 +690,7 @@
   }
   function drawBackground(context) {
     var margin = 15.0;
-    context.fillStyle = '#333300';
+    context.fillStyle = '#FFFFFF';
     context.fillRect(0.0, 0.0, context.canvas.width, context.canvas.height);
     context.beginPath();
     context.strokeStyle = '#666600';
@@ -705,7 +705,7 @@
     context.fillRect(bat.location.x - bat.width / 2, bat.location.y - bat.height / 2, bat.width, bat.height);
   }
   function drawBall(ball, context) {
-    context.fillStyle = '#ffffcc';
+    context.fillStyle = '#000000';
     context.beginPath();
     context.arc(ball.center.x, ball.center.y, ball.radius, 0.0, 2 * math.PI);
     context.fill();
